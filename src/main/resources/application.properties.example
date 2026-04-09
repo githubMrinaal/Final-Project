@@ -15,5 +15,6 @@ spring.jpa.properties.hibernate.format_sql=true
 spring.jpa.open-in-view=false
 
 # JWT
-jwt.secret=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+# Generate a secure secret with: openssl rand -hex 32
+jwt.secret=YOUR_SECRET_HERE
 jwt.expiration=86400000
