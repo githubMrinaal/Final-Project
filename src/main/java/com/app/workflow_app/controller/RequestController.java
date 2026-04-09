@@ -3,10 +3,12 @@ package com.app.workflow_app.controller;
 import com.app.workflow_app.dto.CreateRequestDTO;
 import com.app.workflow_app.dto.DecisionDTO;
 import com.app.workflow_app.dto.RequestResponseDTO;
+import com.app.workflow_app.exception.UnauthorizedActionException;
 import com.app.workflow_app.model.Request;
 import com.app.workflow_app.model.User;
 import com.app.workflow_app.service.RequestService;
 import com.app.workflow_app.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,7 +29,7 @@ public class RequestController {
     }
 
     @PostMapping
-    public ResponseEntity<RequestResponseDTO> createRequest(@RequestBody CreateRequestDTO dto) {
+    public ResponseEntity<RequestResponseDTO> createRequest(@Valid @RequestBody CreateRequestDTO dto) {
         User currentUser = getCurrentUser();
         Request created = requestService.createRequest(dto, currentUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(created));
@@ -61,7 +63,7 @@ public class RequestController {
 
     @PostMapping("/{id}/approve")
     public ResponseEntity<RequestResponseDTO> approveRequest(@PathVariable Long id,
-                                                             @RequestBody DecisionDTO dto) {
+                                                             @Valid @RequestBody DecisionDTO dto) {
         User currentUser = getCurrentUser();
         Request approved = requestService.approveRequest(id, dto, currentUser);
         return ResponseEntity.ok(toDTO(approved));
@@ -69,7 +71,7 @@ public class RequestController {
 
     @PostMapping("/{id}/reject")
     public ResponseEntity<RequestResponseDTO> rejectRequest(@PathVariable Long id,
-                                                            @RequestBody DecisionDTO dto) {
+                                                            @Valid @RequestBody DecisionDTO dto) {
         User currentUser = getCurrentUser();
         Request rejected = requestService.rejectRequest(id, dto, currentUser);
         return ResponseEntity.ok(toDTO(rejected));
@@ -78,7 +80,7 @@ public class RequestController {
     private User getCurrentUser() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null) {
-            throw new com.app.workflow_app.exception.UnauthorizedActionException("Not authenticated");
+            throw new UnauthorizedActionException("Not authenticated");
         }
         String email = (String) authentication.getPrincipal();
         return userService.findByEmail(email);

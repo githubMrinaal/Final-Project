@@ -7,6 +7,7 @@ import com.app.workflow_app.dto.RegisterRequest;
 import com.app.workflow_app.exception.UnauthorizedActionException;
 import com.app.workflow_app.model.User;
 import com.app.workflow_app.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,7 +33,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest request) {
         User saved = userService.registerUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "email", saved.getEmail(),
@@ -41,7 +42,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         User user = userService.findByEmail(request.getEmail());
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
