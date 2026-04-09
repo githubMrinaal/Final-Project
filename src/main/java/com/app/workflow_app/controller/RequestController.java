@@ -9,6 +9,7 @@ import com.app.workflow_app.service.RequestService;
 import com.app.workflow_app.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,14 +28,14 @@ public class RequestController {
 
     @PostMapping
     public ResponseEntity<RequestResponseDTO> createRequest(@RequestBody CreateRequestDTO dto) {
-        User currentUser = userService.findByEmail("test@test.com");
+        User currentUser = getCurrentUser();
         Request created = requestService.createRequest(dto, currentUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(created));
     }
 
     @GetMapping("/mine")
     public ResponseEntity<List<RequestResponseDTO>> getMyRequests() {
-        User currentUser = userService.findByEmail("test@test.com");
+        User currentUser = getCurrentUser();
         List<RequestResponseDTO> result = requestService.getMyRequests(currentUser)
                 .stream()
                 .map(this::toDTO)
@@ -44,7 +45,7 @@ public class RequestController {
 
     @GetMapping("/{id}")
     public ResponseEntity<RequestResponseDTO> getRequestById(@PathVariable Long id) {
-        User currentUser = userService.findByEmail("test@test.com");
+        User currentUser = getCurrentUser();
         Request request = requestService.getRequestById(id, currentUser);
         return ResponseEntity.ok(toDTO(request));
     }
@@ -61,7 +62,7 @@ public class RequestController {
     @PostMapping("/{id}/approve")
     public ResponseEntity<RequestResponseDTO> approveRequest(@PathVariable Long id,
                                                              @RequestBody DecisionDTO dto) {
-        User currentUser = userService.findByEmail("test@test.com");
+        User currentUser = getCurrentUser();
         Request approved = requestService.approveRequest(id, dto, currentUser);
         return ResponseEntity.ok(toDTO(approved));
     }
@@ -69,9 +70,18 @@ public class RequestController {
     @PostMapping("/{id}/reject")
     public ResponseEntity<RequestResponseDTO> rejectRequest(@PathVariable Long id,
                                                             @RequestBody DecisionDTO dto) {
-        User currentUser = userService.findByEmail("test@test.com");
+        User currentUser = getCurrentUser();
         Request rejected = requestService.rejectRequest(id, dto, currentUser);
         return ResponseEntity.ok(toDTO(rejected));
+    }
+
+    private User getCurrentUser() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new com.app.workflow_app.exception.UnauthorizedActionException("Not authenticated");
+        }
+        String email = (String) authentication.getPrincipal();
+        return userService.findByEmail(email);
     }
 
     private RequestResponseDTO toDTO(Request request) {

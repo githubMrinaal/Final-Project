@@ -1,5 +1,6 @@
 package com.app.workflow_app.controller;
 
+import com.app.workflow_app.config.JwtService;
 import com.app.workflow_app.dto.AuthResponse;
 import com.app.workflow_app.dto.LoginRequest;
 import com.app.workflow_app.dto.RegisterRequest;
@@ -22,10 +23,12 @@ public class AuthController {
 
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthController(UserService userService, PasswordEncoder passwordEncoder) {
+    public AuthController(UserService userService, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/register")
@@ -45,6 +48,6 @@ public class AuthController {
             throw new UnauthorizedActionException("Invalid email or password");
         }
 
-        return ResponseEntity.ok(new AuthResponse("JWT_TOKEN_PLACEHOLDER"));
+        return ResponseEntity.ok(new AuthResponse(jwtService.generateToken(user)));
     }
 }
