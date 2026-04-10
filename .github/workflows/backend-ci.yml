@@ -36,6 +36,9 @@ jobs:
           jwt.expiration=86400000
           EOF
 
+      - name: Make mvnw executable
+        run: chmod +x mvnw
+
       - name: Run tests
         run: ./mvnw test
 
