@@ -1,46 +1,28 @@
 name: Backend CI
-
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Set up Java 25
         uses: actions/setup-java@v4
         with:
           java-version: '25'
           distribution: 'temurin'
           cache: 'maven'
-
       - name: Create application.properties
         run: |
-          cat > src/main/resources/application.properties << 'EOF'
-          spring.application.name=workflow-app
-          spring.datasource.url=jdbc:h2:mem:workflowdb
-          spring.datasource.username=sa
-          spring.datasource.password=
-          spring.h2.console.enabled=true
-          spring.jpa.hibernate.ddl-auto=create-drop
-          spring.jpa.show-sql=false
-          spring.jpa.open-in-view=false
-          jwt.secret=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-          jwt.expiration=86400000
-          EOF
-
+          mkdir -p src/main/resources
+          printf 'spring.application.name=workflow-app\nspring.datasource.url=jdbc:h2:mem:workflowdb\nspring.datasource.username=sa\nspring.datasource.password=\nspring.h2.console.enabled=true\nspring.jpa.hibernate.ddl-auto=create-drop\nspring.jpa.show-sql=false\nspring.jpa.open-in-view=false\njwt.secret=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970\njwt.expiration=86400000\n' > src/main/resources/application.properties
       - name: Make mvnw executable
         run: chmod +x mvnw
-
       - name: Run tests
         run: ./mvnw test
-
       - name: Build package
         run: ./mvnw package -DskipTests
