@@ -20,9 +20,7 @@ jobs:
         run: |
           mkdir -p src/main/resources
           printf 'spring.application.name=workflow-app\nspring.datasource.url=jdbc:h2:mem:workflowdb\nspring.datasource.username=sa\nspring.datasource.password=\nspring.h2.console.enabled=true\nspring.jpa.hibernate.ddl-auto=create-drop\nspring.jpa.show-sql=false\nspring.jpa.open-in-view=false\njwt.secret=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970\njwt.expiration=86400000\n' > src/main/resources/application.properties
-      - name: Make mvnw executable
-        run: chmod +x mvnw
       - name: Run tests
-        run: ./mvnw test
+        run: mvn test
       - name: Build package
-        run: ./mvnw package -DskipTests
+        run: mvn package -DskipTests
