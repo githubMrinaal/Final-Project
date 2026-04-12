@@ -16,5 +16,5 @@ spring.jpa.open-in-view=false
 
 # JWT
 # Generate a secure secret with: openssl rand -hex 32
-jwt.secret=YOUR_SECRET_HERE
+jwt.secret=your-dev-secret-here
 jwt.expiration=86400000
