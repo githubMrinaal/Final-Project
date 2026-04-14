@@ -77,7 +77,7 @@ public class RequestController {
         return ResponseEntity.ok(toDTO(rejected));
     }
 
-    @PostMapping("/{id}/cancel")
+    @PostMapping("/{id}/action/cancel")
     public ResponseEntity<RequestResponseDTO> cancelRequest(@PathVariable Long id) {
         User currentUser = getCurrentUser();
         Request cancelled = requestService.cancelRequest(id, currentUser);
