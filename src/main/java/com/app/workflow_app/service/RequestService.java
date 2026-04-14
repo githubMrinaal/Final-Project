@@ -110,6 +110,34 @@ public class RequestService {
     }
 
     @Transactional
+    public Request cancelRequest(Long id, User requester) {
+        Request request = requestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Request not found with id: " + id));
+
+        if (!request.getRequester().getId().equals(requester.getId())) {
+            throw new UnauthorizedActionException("You are not authorized to cancel this request");
+        }
+
+        if (request.getStatus() != RequestStatus.PENDING) {
+            throw new InvalidRequestStateException("Only PENDING requests can be cancelled");
+        }
+
+        request.setStatus(RequestStatus.CANCELLED);
+        request.setDecidedAt(LocalDateTime.now());
+
+        Request saved = requestRepository.save(request);
+
+        AuditLog log = new AuditLog();
+        log.setRequest(saved);
+        log.setAction(AuditAction.CANCELLED);
+        log.setPerformedBy(requester);
+        log.setTimestamp(LocalDateTime.now());
+        auditLogRepository.save(log);
+
+        return saved;
+    }
+
+    @Transactional
     public Request rejectRequest(Long id, DecisionDTO dto, User approver) {
         Request request = requestRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Request not found with id: " + id));
